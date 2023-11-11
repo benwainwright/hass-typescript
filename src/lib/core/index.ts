@@ -9,3 +9,4 @@ export { BaseEntity } from "./base-entity.js";
 export { HomeAssistantApi } from "./home-assistant-api.js";
 export { logger } from "./logger.js";
 export { getConfig } from "./get-config.js";
+export { initialiseClient } from "./initialise-client.js";

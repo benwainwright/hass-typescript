@@ -7,18 +7,17 @@ import {
   Entities,
   EntityType,
   IdType,
+  IClient,
+  StateLoadCallback,
+  StateChangedCallback,
 } from "@types";
 import { removeItemAtIndex } from "@utils";
 import { Calendar, Climate } from "@entities";
 
 import { FIVE_MINUTES } from "./constants.js";
 import { HomeAssistantApi } from "./home-assistant-api.js";
-import { getConfig } from "./get-config.js";
 
-type StateLoadCallback<S> = (state: S) => void;
-type StateChangedCallback<S> = (oldState: S, newState: S) => void;
-
-export class Client {
+export class Client implements IClient {
   private entities: Record<IdType, unknown> = {};
   private hassApi: HomeAssistantApi;
   private states: Map<string, State> = new Map<string, State>();
@@ -33,8 +32,7 @@ export class Client {
   /**
    * Create a new Hass client instance.
    */
-  public static async start(logger: Logger) {
-    const config = getConfig();
+  public static async start(config: HassConfig, logger: Logger) {
     const client = new Client(config, logger);
     await client.init();
     return client;
@@ -48,7 +46,7 @@ export class Client {
     if (Climate.isId(id)) {
       const climate = new Climate<`climate.${string}`>(
         id,
-        this,
+        this
       ) as EntityType<T>;
 
       this.entities[id] = climate;
@@ -58,7 +56,7 @@ export class Client {
     if (Calendar.isId(id)) {
       const calendar = new Calendar<`calendar.${string}`>(
         id,
-        this,
+        this
       ) as EntityType<T>;
       this.entities[id] = calendar;
       return calendar;
@@ -69,13 +67,13 @@ export class Client {
 
   public getEntities<T extends Record<string, IdType>>(ids: T): Entities<T> {
     return Object.fromEntries(
-      Object.entries(ids).map(([key, value]) => [key, this.getEntity(value)]),
+      Object.entries(ids).map(([key, value]) => [key, this.getEntity(value)])
     ) as Entities<T>;
   }
 
   private constructor(
     private hassConfig: HassConfig,
-    private logger: Logger,
+    private logger: Logger
   ) {
     this.hassApi = new HomeAssistantApi(this.hassConfig);
 
@@ -85,6 +83,10 @@ export class Client {
     }, FIVE_MINUTES);
 
     this.timers.push(loadStateTimers);
+  }
+
+  [Symbol.dispose](): void {
+    this.close();
   }
 
   public onStateLoaded<S>(entityId: string, callback: StateLoadCallback<S>) {
@@ -109,7 +111,7 @@ export class Client {
 
   public onStateChanged<S>(
     entityId: string,
-    callback: StateChangedCallback<S>,
+    callback: StateChangedCallback<S>
   ) {
     const storedCallbacks = this.stateLoadCallbacks.get(entityId);
     this.stateChangedCallbacks.set(entityId, [
@@ -124,28 +126,28 @@ export class Client {
 
   public removeStateChangedCallback<S>(
     entityId: string,
-    callback: StateChangedCallback<S>,
+    callback: StateChangedCallback<S>
   ) {
     const storedCallbacks = this.stateChangedCallbacks.get(entityId);
     if (storedCallbacks) {
       const index = storedCallbacks.findIndex((needle) => needle === callback);
       this.stateChangedCallbacks.set(
         entityId,
-        removeItemAtIndex(storedCallbacks, index),
+        removeItemAtIndex(storedCallbacks, index)
       );
     }
   }
 
   public removeOnStateLoadedCallback<S>(
     entityId: string,
-    callback: StateLoadCallback<S>,
+    callback: StateLoadCallback<S>
   ) {
     const storedCallbacks = this.stateLoadCallbacks.get(entityId);
     if (storedCallbacks) {
       const index = storedCallbacks.findIndex((needle) => needle === callback);
       this.stateLoadCallbacks.set(
         entityId,
-        removeItemAtIndex(storedCallbacks, index),
+        removeItemAtIndex(storedCallbacks, index)
       );
     }
   }
@@ -185,7 +187,7 @@ export class Client {
     this.logger.info(`Hass client closed`);
   }
 
-  public async init() {
+  private async init() {
     await this.hassApi.init();
     this.hassApi.websocket.on("state_changed", (event: StateChangedEvent) => {
       try {
