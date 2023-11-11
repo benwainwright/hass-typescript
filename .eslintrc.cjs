@@ -12,6 +12,18 @@ module.exports = {
   plugins: ["@typescript-eslint", "filenames", "import"],
   root: true,
   rules: {
+    "import/no-restricted-paths": [
+      "error",
+      {
+        zones: [
+          {
+            target: "./src/lib/*/**",
+            from: "./src/lib/**/*",
+          },
+        ],
+      },
+    ],
+    "import/no-internal-modules": "off",
     "import/no-relative-parent-imports": "error",
     "@typescript-eslint/prefer-readonly-parameter-types": "off",
     "filenames/match-regex": [2, "^[a-z-0-9.]+$", true],

@@ -3,21 +3,24 @@
     "files": true
   },
   "compilerOptions": {
-    "target": "es2015",
+    "target": "ESNext",
     "module": "nodenext",
     "outDir": "dist",
     "lib": ["ES2023", "DOM"],
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "./",
     "paths": {
-      "@subpackageOne": ["src/lib/subpackageOne"],
-      "@subpackageTwo": ["src/lib/subpackageTwo"]
+      "@core": ["src/lib/core/index.js"],
+      "@types": ["src/lib/types/index.js"],
+      "@entities": ["src/lib/entities/index.js"],
+      "@utils": ["src/lib/utils/index.js"]
     }
   },
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["**/*.ts", "**/*.js", "**/*.mts", ".eslintrc.js"]
+  "include": ["**/*.ts", "**/*.js", "**/*.mts", ".eslintrc.cjs", "lint-staged.config.cjs"]
 }

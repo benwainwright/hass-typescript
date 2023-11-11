@@ -1,1 +1,1 @@
-export {functionOne} from "../../index";
+// export {functionOne} from "../../index";
