@@ -6,91 +6,97 @@ rtm-typescript
 
 ### Functions
 
-- [initialiseApi](README.md#initialiseapi)
+- [initialiseClient](README.md#initialiseclient)
 
 ### Interfaces
 
-- [Auth](interfaces/Auth.md)
-- [CheckTokenParams](interfaces/CheckTokenParams.md)
-- [GetListParams](interfaces/GetListParams.md)
-- [GetTokenParams](interfaces/GetTokenParams.md)
-- [IRememberTheMilkApi](interfaces/IRememberTheMilkApi.md)
-- [RtmApiConfig](interfaces/RtmApiConfig.md)
-- [SuccessResponse](interfaces/SuccessResponse.md)
-- [Tasks](interfaces/Tasks.md)
-- [Test](interfaces/Test.md)
-
-### Classes
-
-- [RtmApiFailedResponseError](classes/RtmApiFailedResponseError.md)
-- [RtmHttpError](classes/RtmHttpError.md)
-- [RtmTypescriptError](classes/RtmTypescriptError.md)
-
-### Enumerations
-
-- [ClientPermissions](enums/ClientPermissions.md)
+- [IClient](interfaces/IClient.md)
 
 ### Type Aliases
 
-- [ExpandRecursively](README.md#expandrecursively)
+- [StateChangedCallback](README.md#statechangedcallback)
+- [StateLoadCallback](README.md#stateloadcallback)
 
 ## Functions
 
-### initialiseApi
+### initialiseClient
 
-▸ **initialiseApi**(`config`): [`IRememberTheMilkApi`](interfaces/IRememberTheMilkApi.md)
+▸ **initialiseClient**(`config`, `logger`): `Promise`\<[`IClient`](interfaces/IClient.md)\>
 
-Entry point to the API. Calling it with valid credentials will initialise and return an instantiated [IRememberTheMilkApi](interfaces/IRememberTheMilkApi.md)
+Initialise an instance of the home assistant client and connect to your server
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `config` | [`RtmApiConfig`](interfaces/RtmApiConfig.md) | Configuration object for the API |
+| `config` | `HassConfig` | Configuration for the client |
+| `logger` | `Logger` | A logger instance |
 
 #### Returns
 
-[`IRememberTheMilkApi`](interfaces/IRememberTheMilkApi.md)
-
-**`Example`**
-
-```TypeScript
- import { initialiseApi, ClientPermissions } from "rtm-typescript";
-
- const key = "my-api-key";
- const secret = "my-shared-secret";
-
- const myAsyncFunction = async () => {
-
-   const client = initialiseApi({
-     key,
-     secret,
-     permissions: ClientPermissions.Read,
-   });
-
-   const result = await client.tasks.getList({ list_id: "2"});
- }
-```
+`Promise`\<[`IClient`](interfaces/IClient.md)\>
 
 #### Defined in
 
-[src/lib/core/initialise-api.ts:63](https://github.com/benwainwright/rtm-typescript/blob/566fc76/src/lib/core/initialise-api.ts#L63)
+lib/core/initialise-client.ts:12
 
 ## Type Aliases
 
-### ExpandRecursively
+### StateChangedCallback
 
-Ƭ **ExpandRecursively**\<`T`\>: `T` extends `object` ? `T` extends infer O ? \{ [K in keyof O]: ExpandRecursively\<O[K]\> } : `never` : `T`
-
-A helper type that expands types so that they resolve to their final forma
-in editor tooltips
+Ƭ **StateChangedCallback**\<`S`\>: (`oldState`: `S`, `newState`: `S`) => `void`
 
 #### Type parameters
 
 | Name |
 | :------ |
-| `T` |
+| `S` |
+
+#### Type declaration
+
+▸ (`oldState`, `newState`): `void`
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `oldState` | `S` |
+| `newState` | `S` |
+
+##### Returns
+
+`void`
 
 #### Defined in
 
-[src/lib/types/expand-recursively.ts:7](https://github.com/benwainwright/rtm-typescript/blob/566fc76/src/lib/types/expand-recursively.ts#L7)
+lib/types/state-callbacks.ts:2
+
+___
+
+### StateLoadCallback
+
+Ƭ **StateLoadCallback**\<`S`\>: (`state`: `S`) => `void`
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `S` |
+
+#### Type declaration
+
+▸ (`state`): `void`
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `state` | `S` |
+
+##### Returns
+
+`void`
+
+#### Defined in
+
+lib/types/state-callbacks.ts:1
