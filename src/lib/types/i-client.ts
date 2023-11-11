@@ -36,8 +36,8 @@ export interface IClient {
   /**
    * Set the state of a given entity
    *
-   * @param entityId
-   * @param state
+   * @param entityId - the entity id string
+   * @param state - the new state
    */
   setState<I extends IdType, S>(entityId: I, state: S): Promise<unknown>;
 

@@ -4,12 +4,15 @@ import { CalendarState, IdType, CalendarEvent } from "@types";
 type StartEventCallback = (eventDetails: CalendarEvent) => void;
 type FinishEventCallback = () => void;
 
+/**
+ * represents a set of events with a start and end date and/or time. See {@link https://developers.home-assistant.io/docs/core/entity/calendar}
+ */
 export class Calendar<I extends `calendar.${string}`> {
   private entity: BaseEntity<I, CalendarState>;
 
   constructor(
     private id: I,
-    client: Client,
+    client: Client
   ) {
     this.entity = new BaseEntity(this.id, client);
   }
@@ -30,7 +33,7 @@ export class Calendar<I extends `calendar.${string}`> {
   }
 
   private parseAttributes(
-    attributes: CalendarState["attributes"],
+    attributes: CalendarState["attributes"]
   ): CalendarEvent {
     return {
       ...attributes,
@@ -60,3 +63,4 @@ export class Calendar<I extends `calendar.${string}`> {
     });
   }
 }
+export interface ICalendar {}

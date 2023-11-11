@@ -7,6 +7,11 @@ import {
   InputBooleanState,
 } from "./states/index.js";
 
+/**
+ * The state of an entity
+ *
+ * @public
+ */
 export type State =
   | CalendarState
   | LightState

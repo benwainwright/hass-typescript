@@ -38,13 +38,13 @@ ___
 
 ### cachedStates
 
-▸ **cachedStates**(): `Map`\<`string`, `State`\>
+▸ **cachedStates**(): `Map`\<`string`, [`State`](../README.md#state)\>
 
 Returns a map of all the states that have been loaded so far
 
 #### Returns
 
-`Map`\<`string`, `State`\>
+`Map`\<`string`, [`State`](../README.md#state)\>
 
 #### Defined in
 
@@ -109,7 +109,7 @@ will be correctly typed based on their id string
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `Record`\<`string`, `IdType`\> |
+| `T` | extends `Record`\<`string`, [`IdType`](../README.md#idtype)\> |
 
 #### Parameters
 
@@ -138,7 +138,7 @@ ___
 
 ### getEntity
 
-▸ **getEntity**\<`T`\>(`id`): `EntityType`\<`T`\>
+▸ **getEntity**\<`T`\>(`id`): [`EntityType`](../README.md#entitytype)\<`T`\>
 
 Get an entity object for a given id
 
@@ -146,7 +146,7 @@ Get an entity object for a given id
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends `IdType` |
+| `T` | extends [`IdType`](../README.md#idtype) |
 
 #### Parameters
 
@@ -156,7 +156,7 @@ Get an entity object for a given id
 
 #### Returns
 
-`EntityType`\<`T`\>
+[`EntityType`](../README.md#entitytype)\<`T`\>
 
 #### Defined in
 
@@ -232,15 +232,15 @@ Set the state of a given entity
 
 | Name | Type |
 | :------ | :------ |
-| `I` | extends `IdType` |
+| `I` | extends [`IdType`](../README.md#idtype) |
 | `S` | `S` |
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `entityId` | `I` |
-| `state` | `S` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `entityId` | `I` | the entity id string |
+| `state` | `S` | the new state |
 
 #### Returns
 

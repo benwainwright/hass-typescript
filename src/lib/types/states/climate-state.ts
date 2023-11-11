@@ -1,5 +1,8 @@
 import { BaseState } from "@types";
 
+/**
+ * @public
+ */
 export interface ClimateState extends BaseState {
   state: "heat" | "cool" | "off";
   entity_id: `climate.${string}`;

@@ -5,33 +5,276 @@
 ```ts
 
 // @public
+export interface BaseState {
+    attributes?: Record<string, string | number | boolean | string[]>;
+    context?: StateContext;
+    entity_id: string;
+    last_changed?: Date;
+    last_updated?: Date;
+    state: string;
+}
+
+// @public
+export class Calendar<I extends `calendar.${string}`> {
+    // Warning: (ae-forgotten-export) The symbol "Client" needs to be exported by the entry point index.d.ts
+    constructor(id: I, client: Client);
+    // (undocumented)
+    get currentEvent(): CalendarEvent;
+    // (undocumented)
+    isEventCurrentlyHappening(): boolean;
+    // (undocumented)
+    static isId(id: IdType): id is `calendar.${string}`;
+    // Warning: (ae-forgotten-export) The symbol "FinishEventCallback" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    onFinishEvent(callback: FinishEventCallback): void;
+    // Warning: (ae-forgotten-export) The symbol "StartEventCallback" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    onStartEvent(callback: StartEventCallback): void;
+}
+
+// @public (undocumented)
+export interface CalendarEvent {
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    end: Date;
+    // (undocumented)
+    location: string;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    start: Date;
+}
+
+// @public (undocumented)
+export interface CalendarState extends BaseState {
+    // (undocumented)
+    attributes?: Partial<CalendarStateAttributes>;
+    // (undocumented)
+    entity_id: `calendar.${string}`;
+    // (undocumented)
+    state: "on" | "off";
+}
+
+// @public (undocumented)
+export interface CalendarStateAttributes {
+    // (undocumented)
+    all_day: boolean;
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    end_time: string;
+    // (undocumented)
+    friendly_name: string;
+    // (undocumented)
+    location: string;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    offset_reached: boolean;
+    // (undocumented)
+    start_time: string;
+    // (undocumented)
+    supported_features: number;
+}
+
+// @public (undocumented)
+export class Climate<I extends `climate.${string}`> {
+    constructor(id: I, client: Client);
+    // (undocumented)
+    static isId(id: IdType): id is `climate.${string}`;
+    // Warning: (ae-forgotten-export) The symbol "StateChangeCallback" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    onStateChange(callback: StateChangeCallback): void;
+    // (undocumented)
+    setAuxHeat(auxHeat: string): Promise<void>;
+    // (undocumented)
+    setHvacMode(mode: string): Promise<void>;
+    // (undocumented)
+    setPresetMode(mode: string): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "SetTemperatureArgs" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    setTemperature(args: SetTemperatureArgs): Promise<void>;
+    // (undocumented)
+    get state(): ClimateState;
+}
+
+// @public (undocumented)
+export interface ClimateState extends BaseState {
+    // (undocumented)
+    attributes?: Partial<{
+        hvac_modes: string[];
+        min_temp: number;
+        max_temp: number;
+        target_temp_stemp: number;
+        preset_modes: string[];
+        current_temperature: number;
+        temperature: number;
+        hvac_action: string;
+        preset_mode: string;
+        icon: string;
+        friendly_name: string;
+        supported_features: number;
+    }>;
+    // (undocumented)
+    entity_id: `climate.${string}`;
+    // (undocumented)
+    state: "heat" | "cool" | "off";
+}
+
+// @public (undocumented)
+export type Entity = typeof Calendar<`calendar.${string}`> | typeof Climate<`climate.${string}`> | typeof Switch<`switch.${string}`> | typeof InputBoolean<`input_boolean.${string}`>;
+
+// @public (undocumented)
+export type EntityType<T extends IdType> = EntityWithMatchingId<T, Entity>;
+
+// @public (undocumented)
+export type EntityWithMatchingId<T extends IdType, Y extends abstract new (...args: any[]) => unknown> = Y extends MatchesId<T, Y> ? InstanceType<Y> : never;
+
+// @public (undocumented)
+export interface HassConfig {
+    host: string;
+    httpPath: string;
+    port?: number;
+    token: string;
+    websocketPath: string;
+}
+
+// @public
 export interface IClient {
     [Symbol.dispose](): void;
-    // Warning: (ae-forgotten-export) The symbol "State" needs to be exported by the entry point index.d.ts
     cachedStates(): Map<string, State>;
     callService<F>(domain: string, service: string, fields: F): Promise<void>;
     close(): void;
     // Warning: (ae-forgotten-export) The symbol "Entities" needs to be exported by the entry point index.d.ts
     getEntities<T extends Record<string, IdType>>(ids: T): Entities<T>;
-    // Warning: (ae-forgotten-export) The symbol "IdType" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "EntityType" needs to be exported by the entry point index.d.ts
     getEntity<T extends IdType>(id: T): EntityType<T>;
     onStateChanged<S>(entityId: string, callback: StateChangedCallback<S>): void;
     removeStateChangedCallback<S>(entityId: string, callback: StateChangedCallback<S>): void;
     setState<I extends IdType, S>(entityId: I, state: S): Promise<unknown>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "HassConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "Logger" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "GetIdTypes" needs to be exported by the entry point index.d.ts
 //
+// @public (undocumented)
+export type IdType = GetIdTypes<Entity>;
+
 // @public
 export const initialiseClient: (config: HassConfig, logger: Logger) => Promise<IClient>;
+
+// @public (undocumented)
+export class InputBoolean<I extends `input_boolean.${string}`> {
+    constructor(id: I, client: Client);
+    // (undocumented)
+    static isId(id: IdType): id is `input_boolean.${string}`;
+    // Warning: (ae-forgotten-export) The symbol "StateChangeCallback_3" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    onStateChange(callback: StateChangeCallback_3): void;
+    // (undocumented)
+    get state(): InputBooleanState;
+    // (undocumented)
+    toggle(): Promise<void>;
+    // (undocumented)
+    turnOff(): Promise<void>;
+    // (undocumented)
+    turnOn(): Promise<void>;
+}
+
+// @public (undocumented)
+export interface InputBooleanState extends BaseState {
+    // (undocumented)
+    attributes?: Partial<{
+        icon: string;
+        friendly_name: string;
+    }>;
+    // (undocumented)
+    entity_id: `input_boolean..${string}`;
+    // (undocumented)
+    state: "on" | "off";
+}
+
+// @public (undocumented)
+export class Light<I extends `light.${string}`> {
+}
+
+// @public (undocumented)
+export interface LightState extends BaseState {
+    // (undocumented)
+    entity_id: `light.${string}`;
+}
+
+// @public (undocumented)
+export interface Logger {
+    // (undocumented)
+    debug: (message: string) => void;
+    // (undocumented)
+    error: (message: string | Error) => void;
+    // (undocumented)
+    info: (message: string) => void;
+    // (undocumented)
+    trace: (message: string) => void;
+    // (undocumented)
+    warn: (message: string) => void;
+}
+
+// @public (undocumented)
+export type MatchesId<T extends IdType, Y extends abstract new (...args: unknown[]) => unknown> = T extends ConstructorParameters<Y>[0] ? Y : never;
+
+// @public
+export type State = CalendarState | LightState | ClimateState | SwitchState | InputBooleanState;
 
 // @public (undocumented)
 export type StateChangedCallback<S> = (oldState: S, newState: S) => void;
 
 // @public (undocumented)
+export interface StateContext {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    parent_id: string | null;
+    // (undocumented)
+    user_id: string | null;
+}
+
+// @public (undocumented)
 export type StateLoadCallback<S> = (state: S) => void;
+
+// @public (undocumented)
+export class Switch<I extends `switch.${string}`> {
+    constructor(id: I, client: Client);
+    // (undocumented)
+    static isId(id: IdType): id is `switch.${string}`;
+    // Warning: (ae-forgotten-export) The symbol "StateChangeCallback_2" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    onStateChange(callback: StateChangeCallback_2): void;
+    // (undocumented)
+    get state(): SwitchState;
+    // (undocumented)
+    toggle(): Promise<void>;
+    // (undocumented)
+    turnOff(): Promise<void>;
+    // (undocumented)
+    turnOn(): Promise<void>;
+}
+
+// @public (undocumented)
+export interface SwitchState extends BaseState {
+    // (undocumented)
+    attributes?: Partial<{
+        icon: string;
+        friendly_name: string;
+    }>;
+    // (undocumented)
+    entity_id: `switch.${string}`;
+    // (undocumented)
+    state: "on" | "off";
+}
 
 // (No @packageDocumentation comment for this package)
 

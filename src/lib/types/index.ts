@@ -6,8 +6,9 @@ export { IClient } from "./i-client.js";
 export {
   LightState,
   SwitchState,
-  CalendarState,
   InputBooleanState,
+  CalendarState,
+  CalendarStateAttributes,
   ClimateState,
 } from "./states/index.js";
 
@@ -17,7 +18,7 @@ export { StateForId } from "./state.js";
 export { RawState } from "./raw-state.js";
 export { Entity, Entities } from "./entity.js";
 export { IdType } from "./id-type.js";
-export { EntityType } from "./entity-type.js";
+export { EntityType, EntityWithMatchingId, MatchesId } from "./entity-type.js";
 export { StateChangedEvent } from "./state-changed-event.js";
 export { StateContext } from "./state-context.js";
 export { State } from "./state.js";

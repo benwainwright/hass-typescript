@@ -1,12 +1,12 @@
 import { Entity } from "./entity.js";
 import { IdType } from "./id-type.js";
 
-type MatchesId<
+export type MatchesId<
   T extends IdType,
   Y extends abstract new (...args: unknown[]) => unknown,
 > = T extends ConstructorParameters<Y>[0] ? Y : never;
 
-type EntityWithMatchingId<
+export type EntityWithMatchingId<
   T extends IdType,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Y extends abstract new (...args: any[]) => unknown,
