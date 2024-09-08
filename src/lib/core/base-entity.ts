@@ -18,9 +18,12 @@ export class BaseEntity<I extends IdType, S, SM = object> {
       );
     }
 
+    console.log("TEST");
+
     this._state = state;
 
     this.client.onStateChanged<S>(id, (_, newState) => {
+      console.log("TEST");
       this._state = newState;
     });
   }

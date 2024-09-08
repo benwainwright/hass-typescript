@@ -50,6 +50,7 @@ export class Climate<I extends `${typeof Climate.domain}.${string}`> {
     public id: I,
     client: Client
   ) {
+    console.log("START");
     this.entity = new BaseEntity(id, client);
   }
 
