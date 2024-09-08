@@ -1,9 +1,9 @@
-import { Client, BaseEntity } from "@core";
-import { ClimateState, IdType } from "@types";
+import { Client, BaseEntity, assertIdMatchesDomain } from "@core";
+import { ClimateState } from "@types";
 
 type StateChangeCallback = (
   oldState: ClimateState,
-  newState: ClimateState,
+  newState: ClimateState
 ) => void;
 
 type SetTemperatureArgs = {
@@ -41,22 +41,28 @@ interface ClimateCommandMap {
   };
 }
 
-export class Climate<I extends `climate.${string}`> {
+export class Climate<I extends `${typeof Climate.domain}.${string}`> {
+  static readonly domain = "climate";
+
   private entity: BaseEntity<I, ClimateState, ClimateCommandMap>;
 
   constructor(
-    private id: I,
-    client: Client,
+    public id: I,
+    client: Client
   ) {
-    this.entity = new BaseEntity(this.id, client);
+    this.entity = new BaseEntity(id, client);
   }
 
   public get state(): ClimateState {
     return this.entity.state;
   }
 
-  public static isId(id: IdType): id is `climate.${string}` {
-    return id.startsWith("climate.");
+  public static make<I extends string>(
+    id: I,
+    client: Client
+  ): Climate<`climate.${string}`> {
+    assertIdMatchesDomain(id, "climate");
+    return new Climate(id, client);
   }
 
   public async setTemperature(args: SetTemperatureArgs) {

@@ -26,6 +26,7 @@ module.exports = {
     "import/no-internal-modules": "off",
     "import/no-relative-parent-imports": "error",
     "@typescript-eslint/prefer-readonly-parameter-types": "off",
+    "@typescript-eslint/member-ordering": "error",
     "filenames/match-regex": [2, "^[a-z-0-9.]+$", true],
   },
   overrides: [

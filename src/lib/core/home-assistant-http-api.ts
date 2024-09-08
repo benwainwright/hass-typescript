@@ -5,6 +5,14 @@ type HttpMethod = "GET" | "POST";
 export class HomeAssistantHttpApi {
   public constructor(private hassConfig: HassConfig) {}
 
+  public async get<T>(path: string) {
+    return await this.request<T, Record<string, never>>("GET", path);
+  }
+
+  public async post<T, B>(path: string, body: B) {
+    return await this.request<T, B>("POST", path, body);
+  }
+
   private async request<T, B>(method: HttpMethod, path: string, body?: B) {
     const normalisedHost = this.hassConfig.host.endsWith("/")
       ? this.hassConfig.host.slice(0, -1)
@@ -24,13 +32,5 @@ export class HomeAssistantHttpApi {
 
     const response = await fetch(url, params);
     return (await response.json()) as T;
-  }
-
-  public async get<T>(path: string) {
-    return await this.request<T, Record<string, never>>("GET", path);
-  }
-
-  public async post<T, B>(path: string, body: B) {
-    return await this.request<T, B>("POST", path, body);
   }
 }

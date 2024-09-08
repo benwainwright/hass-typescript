@@ -1,6 +1,4 @@
-import { EntityType } from "./entity-type.js";
-import { Entities } from "./entity.js";
-import { IdType } from "./id-type.js";
+import { EntityType, IdType, Entities } from "./entity-type.js";
 import { StateChangedCallback } from "./state-callbacks.js";
 import { State } from "./state.js";
 
@@ -31,7 +29,7 @@ export interface IClient {
    *
    * @param ids - Map of entities
    */
-  getEntities<T extends Record<string, IdType>>(ids: T): Entities<T>;
+  getEntities<T extends Record<keyof T, IdType>>(ids: T): Entities<T>;
 
   /**
    * Set the state of a given entity

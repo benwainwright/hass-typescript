@@ -1,3 +1,5 @@
+import * as entities from "@entities";
+
 import {
   HassConfig,
   Logger,
@@ -5,20 +7,20 @@ import {
   State,
   StateChangedEvent,
   Entities,
-  EntityType,
   IdType,
   IClient,
   StateLoadCallback,
   StateChangedCallback,
+  EntityType,
 } from "@types";
 import { removeItemAtIndex } from "@utils";
-import { Calendar, Climate } from "@entities";
 
 import { FIVE_MINUTES } from "./constants.js";
 import { HomeAssistantApi } from "./home-assistant-api.js";
+import { matchesId } from "./matches-id.js";
 
 export class Client implements IClient {
-  private entities: Record<IdType, unknown> = {};
+  private entities: Map<IdType, { id: IdType }> = new Map();
   private hassApi: HomeAssistantApi;
   private states: Map<string, State> = new Map<string, State>();
   private timers: NodeJS.Timeout[] = [];
@@ -28,48 +30,6 @@ export class Client implements IClient {
 
   private stateChangedCallbacks: Map<string, StateChangedCallback<unknown>[]> =
     new Map<string, StateChangedCallback<unknown>[]>();
-
-  /**
-   * Create a new Hass client instance.
-   */
-  public static async start(config: HassConfig, logger: Logger) {
-    const client = new Client(config, logger);
-    await client.init();
-    return client;
-  }
-
-  public getEntity<T extends IdType>(id: T): EntityType<T> {
-    if (id in this.entities) {
-      return this.entities[id] as EntityType<T>;
-    }
-
-    if (Climate.isId(id)) {
-      const climate = new Climate<`climate.${string}`>(
-        id,
-        this
-      ) as EntityType<T>;
-
-      this.entities[id] = climate;
-      return climate;
-    }
-
-    if (Calendar.isId(id)) {
-      const calendar = new Calendar<`calendar.${string}`>(
-        id,
-        this
-      ) as EntityType<T>;
-      this.entities[id] = calendar;
-      return calendar;
-    }
-
-    throw new Error("Unrecognised ID");
-  }
-
-  public getEntities<T extends Record<string, IdType>>(ids: T): Entities<T> {
-    return Object.fromEntries(
-      Object.entries(ids).map(([key, value]) => [key, this.getEntity(value)])
-    ) as Entities<T>;
-  }
 
   private constructor(
     private hassConfig: HassConfig,
@@ -83,6 +43,57 @@ export class Client implements IClient {
     }, FIVE_MINUTES);
 
     this.timers.push(loadStateTimers);
+  }
+
+  /**
+   * Create a new Hass client instance.
+   */
+  public static async start(config: HassConfig, logger: Logger) {
+    const client = new Client(config, logger);
+    await client.init();
+    return client;
+  }
+
+  public getEntity<T extends IdType>(id: T): EntityType<T> {
+    const entity = this.entities.get(id);
+
+    if (entity && matchesId(entity, entity.id, id)) {
+      return entity;
+    }
+
+    const newEntity = Object.entries(entities)
+      .map(([, entity]) => entity)
+      .map((item) => {
+        try {
+          return item.make(id, this);
+        } catch {
+          return undefined;
+        }
+      })
+      .find((item) => item);
+
+    if (newEntity && matchesId(newEntity, newEntity.id, id)) {
+      this.entities.set(id, newEntity);
+      return newEntity;
+    }
+
+    throw new Error("Unrecognised ID");
+  }
+
+  public getEntities<T extends Record<string, IdType>, R extends Entities<T>>(
+    ids: T
+  ): R {
+    return Object.fromEntries(
+      Object.entries(ids).map(([key, value]) => [key, this.getEntity(value)])
+    ) as R;
+  }
+
+  public close() {
+    this.hassApi.close();
+    this.timers.forEach((timer) => {
+      clearInterval(timer);
+    });
+    this.logger.info(`Hass client closed`);
   }
 
   [Symbol.dispose](): void {
@@ -100,13 +111,6 @@ export class Client implements IClient {
 
   public async setState<I extends IdType, S>(entityId: I, state: S) {
     return await this.hassApi.http.post(`states/${entityId}`, state);
-  }
-
-  private stateChangedListener(event: StateChangedEvent) {
-    const callbacks = this.stateChangedCallbacks.get(event.data.entity_id);
-    callbacks?.forEach((callback) => {
-      callback(event.data.old_state, event.data.new_state);
-    });
   }
 
   public onStateChanged<S>(
@@ -152,6 +156,17 @@ export class Client implements IClient {
     }
   }
 
+  public cachedStates() {
+    return this.states;
+  }
+
+  private stateChangedListener(event: StateChangedEvent) {
+    const callbacks = this.stateChangedCallbacks.get(event.data.entity_id);
+    callbacks?.forEach((callback) => {
+      callback(event.data.old_state, event.data.new_state);
+    });
+  }
+
   private parseState(state: RawState): State {
     return {
       ...state,
@@ -179,14 +194,6 @@ export class Client implements IClient {
     this.states = stateMap;
   }
 
-  public close() {
-    this.hassApi.close();
-    this.timers.forEach((timer) => {
-      clearInterval(timer);
-    });
-    this.logger.info(`Hass client closed`);
-  }
-
   private async init() {
     await this.hassApi.init();
     this.hassApi.websocket.on("state_changed", (event: StateChangedEvent) => {
@@ -200,9 +207,5 @@ export class Client implements IClient {
     });
     await this.loadStates();
     this.logger.info("Hass client initialised");
-  }
-
-  public cachedStates() {
-    return this.states;
   }
 }

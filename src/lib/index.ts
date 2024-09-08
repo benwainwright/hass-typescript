@@ -21,6 +21,4 @@ export {
   LightState,
   SwitchState,
   Entity,
-  EntityWithMatchingId,
-  MatchesId,
 } from "@types";

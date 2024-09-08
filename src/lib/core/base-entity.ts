@@ -7,14 +7,14 @@ export class BaseEntity<I extends IdType, S, SM = object> {
 
   constructor(
     private id: I,
-    private client: Client,
+    private client: Client
   ) {
     this.client.onStateLoaded(this.id, this.stateLoadedListener);
     const state = this.client.cachedStates().get(this.id) as S | undefined;
 
     if (!state) {
       throw new Error(
-        "State could not be loaded. That means either the entity id is wrong, or the client has not been initialised",
+        "State could not be loaded. That means either the entity id is wrong, or the client has not been initialised"
       );
     }
 
@@ -23,6 +23,10 @@ export class BaseEntity<I extends IdType, S, SM = object> {
     this.client.onStateChanged<S>(id, (_, newState) => {
       this._state = newState;
     });
+  }
+
+  get state() {
+    return this._state;
   }
 
   public async setState(state: Omit<S, "entity_id">) {
@@ -38,14 +42,10 @@ export class BaseEntity<I extends IdType, S, SM = object> {
     this.client.onStateChanged<S>(this.id, callback);
   }
 
-  get state() {
-    return this._state;
-  }
+  stateListener() {}
 
   private onStateLoaded(state: S) {
     this._state = state;
     this.client.removeOnStateLoadedCallback(this.id, this.stateLoadedListener);
   }
-
-  stateListener() {}
 }

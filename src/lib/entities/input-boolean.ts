@@ -1,5 +1,7 @@
-import { BaseEntity, Client } from "@core";
-import { IdType, InputBooleanState } from "@types";
+import { BaseEntity, Client, assertIdMatchesDomain } from "@core";
+import { InputBooleanState } from "@types";
+
+export const ENTITY_DOMAIN_STRING = "input_boolean";
 
 interface InputBooleanServiceMap {
   turn_on: {
@@ -19,31 +21,37 @@ interface InputBooleanServiceMap {
 
 type StateChangeCallback = (
   oldState: InputBooleanState,
-  newState: InputBooleanState,
+  newState: InputBooleanState
 ) => void;
 
-export class InputBoolean<I extends `input_boolean.${string}`> {
+export class InputBoolean<
+  I extends `${typeof ENTITY_DOMAIN_STRING}.${string}`,
+> {
   private entity: BaseEntity<I, InputBooleanState, InputBooleanServiceMap>;
 
   constructor(
-    private id: I,
-    client: Client,
+    public readonly id: I,
+    client: Client
   ) {
     this.entity = new BaseEntity(this.id, client);
   }
 
-  public static isId(id: IdType): id is `input_boolean.${string}` {
-    return id.startsWith("input_boolean.");
+  public get state() {
+    return this.entity.state;
+  }
+
+  public static make<I extends string>(
+    id: I,
+    client: Client
+  ): InputBoolean<`input_boolean.${string}`> {
+    assertIdMatchesDomain(id, "input_boolean");
+    return new InputBoolean(id, client);
   }
 
   public async turnOn() {
     await this.entity.setState({
       state: "on",
     });
-  }
-
-  public get state() {
-    return this.entity.state;
   }
 
   public async turnOff() {

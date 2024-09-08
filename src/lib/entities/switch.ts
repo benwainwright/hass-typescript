@@ -1,5 +1,5 @@
-import { BaseEntity, Client } from "@core";
-import { IdType, SwitchState } from "@types";
+import { BaseEntity, Client, assertIdMatchesDomain } from "@core";
+import { SwitchState } from "@types";
 
 interface SwitchServiceMap {
   turn_on: {
@@ -18,25 +18,34 @@ type StateChangeCallback = (
   newState: SwitchState
 ) => void;
 
-export class Switch<I extends `switch.${string}`> {
+export const ENTITY_DOMAIN_STRING = "switch";
+
+export class Switch<I extends `${typeof ENTITY_DOMAIN_STRING}.${string}`> {
   private entity: BaseEntity<I, SwitchState, SwitchServiceMap>;
 
-  constructor(private id: I, client: Client) {
+  constructor(
+    public readonly id: I,
+    client: Client
+  ) {
     this.entity = new BaseEntity(this.id, client);
   }
 
-  public static isId(id: IdType): id is `switch.${string}` {
-    return id.startsWith("switch.");
+  public get state() {
+    return this.entity.state;
+  }
+
+  public static make<I extends string>(
+    id: I,
+    client: Client
+  ): Switch<`switch.${string}`> {
+    assertIdMatchesDomain(id, "switch");
+    return new Switch(id, client);
   }
 
   public async turnOn() {
     await this.entity.setState({
       state: "on",
     });
-  }
-
-  public get state() {
-    return this.entity.state;
   }
 
   public async turnOff() {

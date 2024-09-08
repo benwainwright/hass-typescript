@@ -1,28 +1,22 @@
-import { Client, BaseEntity } from "@core";
-import { CalendarState, IdType, CalendarEvent } from "@types";
+import { Client, BaseEntity, assertIdMatchesDomain } from "@core";
+import { CalendarState, CalendarEvent } from "@types";
 
 type StartEventCallback = (eventDetails: CalendarEvent) => void;
 type FinishEventCallback = () => void;
 
+export const ENTITY_DOMAIN_STRING = "calendar";
+
 /**
  * represents a set of events with a start and end date and/or time. See {@link https://developers.home-assistant.io/docs/core/entity/calendar}
  */
-export class Calendar<I extends `calendar.${string}`> {
+export class Calendar<I extends `${typeof ENTITY_DOMAIN_STRING}.${string}`> {
   private entity: BaseEntity<I, CalendarState>;
 
   constructor(
-    private id: I,
+    public id: I,
     client: Client
   ) {
     this.entity = new BaseEntity(this.id, client);
-  }
-
-  public static isId(id: IdType): id is `calendar.${string}` {
-    return id.startsWith("calendar.");
-  }
-
-  isEventCurrentlyHappening() {
-    return this.entity.state.state === "on";
   }
 
   get currentEvent() {
@@ -32,17 +26,16 @@ export class Calendar<I extends `calendar.${string}`> {
     return this.parseAttributes(this.entity.state.attributes);
   }
 
-  private parseAttributes(
-    attributes: CalendarState["attributes"]
-  ): CalendarEvent {
-    return {
-      ...attributes,
-      message: attributes?.message ?? "",
-      description: attributes?.description ?? "",
-      location: attributes?.location ?? "",
-      start: new Date(attributes?.start_time ?? 0),
-      end: new Date(attributes?.end_time ?? 0),
-    };
+  public static make<I extends string>(
+    id: I,
+    client: Client
+  ): Calendar<`calendar.${string}`> {
+    assertIdMatchesDomain(id, "calendar");
+    return new Calendar(id, client);
+  }
+
+  isEventCurrentlyHappening() {
+    return this.entity.state.state === "on";
   }
 
   public onStartEvent(callback: StartEventCallback) {
@@ -61,6 +54,19 @@ export class Calendar<I extends `calendar.${string}`> {
         callback();
       }
     });
+  }
+
+  private parseAttributes(
+    attributes: CalendarState["attributes"]
+  ): CalendarEvent {
+    return {
+      ...attributes,
+      message: attributes?.message ?? "",
+      description: attributes?.description ?? "",
+      location: attributes?.location ?? "",
+      start: new Date(attributes?.start_time ?? 0),
+      end: new Date(attributes?.end_time ?? 0),
+    };
   }
 }
 export interface ICalendar {}

@@ -12,6 +12,10 @@ export class HomeAssistantApi {
     this.httpClient = new HomeAssistantHttpApi(this.hassConfig);
   }
 
+  public get http() {
+    return this.httpClient;
+  }
+
   public get websocket() {
     if (!this.hassApi) {
       throw new Error("Hass API has not been initialised. Please call .init()");
@@ -22,10 +26,6 @@ export class HomeAssistantApi {
 
   public close() {
     this.hassApi = undefined;
-  }
-
-  public get http() {
-    return this.httpClient;
   }
 
   public async init() {
